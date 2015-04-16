@@ -12,6 +12,7 @@ var Either = EitherModule.Either;
 
 var Try = TryModule.Try;
 
+
 /**
  * Extension method for Maybe which allows you to convert a potential value into either the value or an failure
  * @param  {Function} left	Function called on the Either if it's a failure
@@ -90,18 +91,6 @@ Maybe.bind = function(fn) {
 		);
 	}
 }
-
-var sum = function(a, b) {
-	if(arguments.length < 2) throw "There's not a valid call for sum with less than 2 arguments";
-	if(arguments.length > 2) throw "There's not a valid call for sum with more than 2 arguments";
-	return a + b;
-};
-
-var maybeSum = Maybe.bind(sum);
-
-console.log(
-	maybeSum(3, 1)
-)
 
 module.exports = {
 	Maybe: Maybe,
