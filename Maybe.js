@@ -1,6 +1,6 @@
 "use strict";
 
-var Maybe = function(value) {
+function Maybe(value) {
 	this.value = value == null || value == undefined ? Maybe.unit : value;
 	this.isEmpty = (value == null || value == undefined);
 
@@ -27,13 +27,13 @@ Maybe.prototype.getWhenNothing = function (NothingFn) {
 		return this.value;
 }
 
-var Nothing = function() {
+function Nothing() {
 	this.value = {}
 }
 Nothing.prototype = Object.create(Maybe.prototype);
 Nothing.constructor = Nothing;
 
-var Just = function(value) {
+function Just(value) {
 	if (value == null || value == undefined) {
 		return new Nothing();
 	}

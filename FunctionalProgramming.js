@@ -19,7 +19,7 @@ var Try = TryModule.Try;
  * @return {Either}					Either the potential type or the designed error value
  */
 Maybe.prototype.asEither = function (left) {
-	return new Either(left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this);
+	return new Either(this.isEmpty && left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this);
 }
 
 /**

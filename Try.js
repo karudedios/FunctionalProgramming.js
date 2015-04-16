@@ -1,6 +1,6 @@
 "use strict";
 
-var Try = function Try(value, error) {
+function Try(value, error) {
 	this.value = value;
 	this.error = error;
 }
