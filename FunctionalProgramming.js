@@ -54,10 +54,10 @@ Either.prototype.toMaybe = function() {
 }
 
 /**
- * Extensio method for Try which allows you to convert an attempt of a value to either a value or a failure
+ * Extension method for Try which allows you to convert an attempt of a value to either a value or a failure
  * @param  {Function} left	failure function
  * @param  {Function} right	success function
- * @return {Either}					Either a value or a failure
+ * @return {Either}		Either a value or a failure
  */
 Try.prototype.asEither = function(left, right) {
 	return new Either(left && left.call(this, this.error), right && right.call(this, this.value));
@@ -66,7 +66,7 @@ Try.prototype.asEither = function(left, right) {
 /**
  * Static method for Maybe which allows yo to turn a non-maybe function to a maybe one
  * @param  {Function} fn	Function to wrap
- * @return {Maybe}				A potential value or nothing
+ * @return {Maybe}		A potential value or nothing
  */
 Maybe.bind = function(fn) {
 	return function() {
