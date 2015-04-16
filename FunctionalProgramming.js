@@ -1,127 +1,81 @@
-function Either(error, value) {
-	var cValue = value;
-	var cError = error;
+"use strict";
 
-	var _isRight = value != null;
-	var _isLeft = !_isRight;
+var MaybeModule = require("./Maybe.js")
+var EitherModule = require("./Either.js")
+var TryModule = require("./Try.js")
 
-	this.isRight = _isRight;
-	this.isLeft = _isLeft;
+var Maybe = MaybeModule.Maybe;
+var Nothing = MaybeModule.Nothing;
+var Just = MaybeModule.Just;
 
-	this.match = function(failure, success) {
-		if (_isRight) {
-			return success && success.call(this, cValue);
-		} else if (_isLeft) {
-			return failure && failure.call(this, cError);
-		}
-	}
+var Either = EitherModule.Either;
 
-	this.select = function(failure, success) {
-		return new Either(failure(cError), success(cValue));
-	}
-
-	this.toMaybe = function() {
-		if (_isRight) {
-			return new Just(cValue);
-		} else {
-			return new Nothing();
-		}
-	}
-}
-
-var Try = {}
-Try.Attempt = function(fn) {
-	var params = [].slice.call(arguments, 1);
-	try {
-		return new Either(null, fn.apply(this, params));
-	} catch (e) {
-		return new Either(e, null);
-	}
-}
-
-var Maybe = function(value, isEmpty) {
-	this.value = value == null || value == undefined ? Maybe.unit : value;
-	this.isEmpty = isEmpty;
-}
-
-Maybe.bind = function(fn) {
-	return function() {
-		var args = [].slice.call(arguments, 0).map(function(x) { return x instanceof Maybe ? x : new Just(x); });
-		var response = new Nothing();
-
-		var invalid = args.some(function(x) {
-			return x instanceof Nothing; 
-		});
-
-		if (!invalid) {
-			response = new Just(
-				fn.apply(this, args.map(function (x) {
-					return x.value;
-				}))
-			);
-		}
-
-		return response;
-	}
-}
-
-Maybe.unit = new (function unit() { })();
-
-Maybe.prototype.match = function(just, nothing) {
-	if (this instanceof Nothing) {
-		return nothing.call(this);
-	} else {
-		return just.call(this, this.value);
-	}
-}
+var Try = TryModule.Try;
 
 Maybe.prototype.asEither = function (left) {
 	return new Either(left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this);
 }
 
-Maybe.prototype.getWhenNothing = function (NothingFn) {
-	if (this instanceof Nothing)
-		return NothingFn();
-	else
-		return this.value;
-}
-
 Maybe.prototype.failWhen = function(failFn, exception) {
 	var self = this;
 	return Try.Attempt(function() {
-		var value = failFn(self.value);
+		var value = failFn.call(this, self.value);
 
 		if (value){
 			throw exception;
 		};
 
-		return self;
-	}).Match(
-		function failure(e) { return e; },
-		function success(v) { return v; }
-	);
+		return self.value;
+	});
 }
 
-var Nothing = function() {
-	Maybe.call(this, null, true);
-}
-Nothing.prototype = Object.create(Maybe.prototype);
-Nothing.constructor = Nothing;
-
-var Just = function(value) {
-	if (value == null || value == Maybe.unit) {
+Either.prototype.toMaybe = function() {
+	if (this.isRight) {
+		return new Just(this.value);
+	} else {
 		return new Nothing();
 	}
-
-	if (value instanceof Maybe) {
-		return value;
-	}
-
-	Maybe.call(this, value, false);
 }
 
-Just.prototype = Object.create(Maybe.prototype);
-Just.constructor = Just;
+Try.prototype.asEither = function(left, right) {
+	return new Either(left && left.call(this, this.error), right && right.call(this, this.value));
+}
+
+Maybe.bind = function(fn) {
+	return function() {
+		var args = [].slice.call(arguments, 0).map(function(x) { return x instanceof Maybe ? x : new Maybe(x); });
+		return Try.Attempt(function() {
+			return new Maybe(args)
+			.failWhen(function fail(collection) {
+				return !collection ||
+							 !collection.length ||
+							  collection.some(function(x) { return (x instanceof Nothing); })
+			}, "Arguments must have value")
+			.match(
+				function just(value) {
+					return new Maybe(fn.apply(this, value.map(function(x) { return x.value; })))
+			  }
+			, function nothing(error) {
+					return new Nothing();
+				})
+		}).match(
+			function success(just) { return just; },
+			function error(nothing) { console.error(nothing); return new Nothing; }
+		);
+	}
+}
+
+var sum = function(a, b) {
+	if(arguments.length < 2) throw "There's not a valid call for sum with less than 2 arguments";
+	if(arguments.length > 2) throw "There's not a valid call for sum with more than 2 arguments";
+	return a + b;
+};
+
+var maybeSum = Maybe.bind(sum);
+
+console.log(
+	maybeSum(3, 1)
+)
 
 module.exports = {
 	Maybe: Maybe,
