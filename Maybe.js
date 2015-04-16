@@ -8,6 +8,10 @@ var Maybe = function(value) {
 	if (!this.isEmpty) return new Just(value);
 }
 
+Maybe.prototype.select = function(just) {
+	return just && just.call(this, this.value);
+}
+
 Maybe.prototype.match = function(just, nothing) {
 	if (this instanceof Nothing) {
 		return nothing.call(this);
