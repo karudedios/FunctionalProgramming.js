@@ -12,14 +12,13 @@ var Either = EitherModule.Either;
 
 var Try = TryModule.Try;
 
-
 /**
  * Extension method for Maybe which allows you to convert a potential value into either the value or an failure
  * @param  {Function} left	Function called on the Either if it's a failure
  * @return {Either}					Either the potential type or the designed error value
  */
 Maybe.prototype.asEither = function (left) {
-	return new Either(this.isEmpty && left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this);
+	return new Either(this.isEmpty && left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this.value);
 }
 
 /**
@@ -92,6 +91,13 @@ Maybe.bind = function(fn) {
 	}
 }
 
+/**
+ * Converts any object to a Maybe
+ * @return {Maybe<T>} Maybe of requester type
+ */
+Object.prototype.toMaybe = function() {
+	return new Just(this);
+}
 module.exports = {
 	Maybe: Maybe,
 	Just: Just,

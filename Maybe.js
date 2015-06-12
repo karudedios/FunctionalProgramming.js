@@ -1,12 +1,14 @@
 "use strict";
 
 function Maybe(value) {
-	this.value = value == null || value == undefined ? Maybe.unit : value;
-	this.isEmpty = (value == null || value == undefined);
+	this.value = (value == null || value == undefined) ? Maybe.unit : value;
+	this.isEmpty = (value == Maybe.unit);
 
 	if (this.isEmpty) return new Nothing();
 	if (!this.isEmpty) return new Just(value);
 }
+
+Maybe.unit = new (function unit() { return this; })
 
 Maybe.prototype.select = function(just) {
 	return just && just.call(this, this.value);
@@ -29,6 +31,13 @@ Maybe.prototype.getWhenNothing = function (NothingFn) {
 
 function Nothing() {
 	this.value = {}
+
+	Object.defineProperty(this, 'isEmpty', {
+		  value: true
+		, enumerable: false
+		, writable: false
+		, configurable: false
+	});
 }
 Nothing.prototype = Object.create(Maybe.prototype);
 Nothing.constructor = Nothing;
@@ -37,6 +46,13 @@ function Just(value) {
 	if (value == null || value == undefined) {
 		return new Nothing();
 	}
+
+	Object.defineProperty(this, 'isEmpty', {
+		  value: false
+		, enumerable: false
+		, writable: false
+		, configurable: false
+	});
 
 	this.value = value;
 }
