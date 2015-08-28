@@ -14,7 +14,7 @@ module.exports = (function() {
 		}
 	}
 
-	Try.Attempt = function(fn) {
+	Try.attempt = function(fn) {
 		var params = [].slice.call(arguments, 1);
 		try {
 			return new Try(fn.apply(this, params), null);

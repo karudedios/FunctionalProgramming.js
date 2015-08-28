@@ -10,10 +10,6 @@ module.exports = (function() {
 		if (!this.isEmpty) return new Just(value);
 	}
 
-	Maybe.prototype.select = function(just) {
-		return just && just.call(this, this.value);
-	}
-
 	Maybe.prototype.match = function(just, nothing) {
 		if (this instanceof Nothing) {
 			return nothing.call(this);
@@ -31,6 +27,7 @@ module.exports = (function() {
 
 	function Nothing() {
 		this.value = {}
+		this.isEmpty= true;
 	}
 
 	Nothing.prototype = Object.create(Maybe.prototype);
@@ -42,6 +39,7 @@ module.exports = (function() {
 		}
 
 		this.value = value;
+		this.isEmpty= false;
 	}
 
 	Just.prototype = Object.create(Maybe.prototype);

@@ -20,6 +20,13 @@ module.exports = (function() {
 		return new Either(failure.call(this, this.error), success.call(this, this.value));
 	}
 
+	Either.prototype.get = function() {
+		return this.match(
+			function left(l) { return l; },
+			function right(r) { return r; }
+		);
+	}
+
 	return {
 		Either: Either
 	};

@@ -4,6 +4,7 @@ module.exports = (function() {
 	var MaybeModule = require("./Maybe.js");
 	var EitherModule = require("./Either.js");
 	var TryModule = require("./Try.js");
+	var IoModule = require("./Io.js");
 
 	var Maybe = MaybeModule.Maybe;
 	var Nothing = MaybeModule.Nothing;
@@ -13,6 +14,7 @@ module.exports = (function() {
 
 	var Try = TryModule.Try;
 
+	var Io = IoModule.Io;
 
 	/**
 	 * Extension method for Maybe which allows you to convert a potential value into either the value or an failure
@@ -20,7 +22,7 @@ module.exports = (function() {
 	 * @return {Either}					Either the potential type or the designed error value
 	 */
 	Maybe.prototype.asEither = function (left) {
-		return new Either(this.isEmpty && left.apply(this, [].slice.call(arguments, 1)), this.isEmpty ? null : this);
+		return new Either(this.isEmpty && left(), this.isEmpty ? null : this.value);
 	}
 
 	/**
@@ -31,15 +33,16 @@ module.exports = (function() {
 	 */
 	Maybe.prototype.failWhen = function(failFn, exception) {
 		var self = this;
-		return Try.Attempt(function() {
-			var value = failFn.call(this, self.value);
-
-			if (value){
+		return Try.attempt(function() {
+			if (failFn.call(this, self.value)){
 				throw exception;
 			};
 
 			return self;
-		});
+		}).match(
+			function success(v) { return v },
+			function failure(f) { return new Nothing }
+		);
 	}
 
 	/**
@@ -61,7 +64,7 @@ module.exports = (function() {
 	 * @return {Either}		Either a value or a failure
 	 */
 	Try.prototype.asEither = function(left, right) {
-		return new Either(left && left.call(this, this.error), right && right.call(this, this.value));
+		return new Either(left && left.call(null, this.error), right && right.call(null, this.value));
 	}
 
 	/**
@@ -72,7 +75,7 @@ module.exports = (function() {
 	Maybe.bind = function(fn) {
 		return function() {
 			var args = [].slice.call(arguments, 0).map(function(x) { return x instanceof Maybe ? x : new Maybe(x); });
-			return Try.Attempt(function() {
+			return Try.attempt(function() {
 				if (!(args && args.length) || args.some(function(x) { return (x instanceof Nothing); })) {
 					throw new Error("Arguments must have value");
 				}
@@ -96,11 +99,48 @@ module.exports = (function() {
 		}
 	}
 
+	Maybe.lift = function(value) {
+		return new Just(value);
+	}
+
+  Either.bind = function(fn, ret) {
+    return (eitherParam) => {
+      return eitherParam.match(
+        function left(l) {
+          return eitherParam;
+        },
+        function right(r) {
+          let response = fn(r);
+          return response
+            ? new Either(null, response)
+            : new Either(ret(), null);
+        });
+    }
+  }
+
+  Either.lift = function(eitherFn, value) {
+    eitherFn = eitherFn || function(n) { return n; }
+    return Maybe.lift(value).match(
+      function just(v) {
+        let t = (new ((value).constructor)(v)).valueOf();
+        let defaultValue = t.name === '' ? NaN : t;
+
+        if (!v && v !== defaultValue) {
+          return new Either(eitherFn(), null);
+        }
+
+        return new Either(null, v);
+      },
+      function nothing() {
+        return new Either(eitherFn(), null);
+      });
+  };
+
 	return {
 		Maybe: Maybe,
-		Just: Just,
-		Nothing: Nothing,
 		Either: Either,
-		Try: Try
+		Try: Try,
+		Io: Io,
+		NOOP: function(n) { return n; }
 	};
 })();
