@@ -1,9 +1,6 @@
-import { Either } from './Either.js'
-import { Maybe } from './Maybe.js'
-import { Try } from './Try.js'
-import { Io } from './Io.js'
+import { Trampoline, Either, Maybe, Try, Io } from '../lib/index'
 
-module.exports = (function() {
+export default (() => {
   Object.assign(Either.prototype, {
     /**
      * Extension method for Either which allows you to convert either a value or a failure into a potential value
@@ -159,5 +156,5 @@ module.exports = (function() {
     }
   });
 
-	return { Maybe, Either, Try, Io, NoOperation(n) { return n; } };
+	return { Trampoline, Either, Maybe, Try, Io, NoOperation(n) { return n; } };
 })();
