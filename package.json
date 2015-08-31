@@ -1,0 +1,24 @@
+{
+  "name": "functional-programming.js",
+  "version": "1.0.0",
+  "description": "Functional Programming in Javascript",
+  "main": "src/FunctionalProgramming.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karudedios/FunctionalProgramming.js.git"
+  },
+  "author": "cdedios",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/karudedios/FunctionalProgramming.js/issues"
+  },
+  "homepage": "https://github.com/karudedios/FunctionalProgramming.js#readme",
+  "devDependencies": {
+    "jasmine-es6": "0.0.17",
+    "jshint": "^2.8.0",
+    "uglify-js": "^2.4.24"
+  }
+}
