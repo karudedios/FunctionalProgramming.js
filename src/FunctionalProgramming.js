@@ -85,6 +85,13 @@ export default (() => {
   });
 
   Object.assign(Either, {
+    /**
+     * Function to lift a function to a higher kinded type
+     * To receive value and return Either value or failure
+     * @param  {[Function]} fail  Failure to evaluate if left
+     * @param  {Function}   fn    Function to lift
+     * @return {[Function]}       Function that was lifted to a higher kinded type 
+     */
     lift(fail, fn) {
       return (...args) => {        
         return Try.unit(() => {
@@ -99,6 +106,13 @@ export default (() => {
       }
     },
 
+    /**
+     * Function to bind a function to a higher kinded type
+     * To receive Either and return Either value or failure
+     * @param  {[Function]} fail  Failure to evaluate if left
+     * @param  {Function}   fn    Function to bind
+     * @return {[Function]}       Function that was binded to a higher kinded type 
+     */
     bind(fail, fn) {
       return (...args) => {        
         return Try.unit(() => {
@@ -121,6 +135,12 @@ export default (() => {
   });
 
   Object.assign(Maybe, {
+    /**
+     * Function to lift a function to a higher kinded type
+     * To receive a potential value and return a potential value
+     * @param  {Function}   fn    Function to lift
+     * @return {[Function]}       Function that was lifted to a higher kinded type 
+     */
     lift(fn) {
       return (...args) => {        
         return Try.unit(() => {
@@ -135,6 +155,12 @@ export default (() => {
       }
     },
 
+    /**
+     * Function to bind a function to a higher kinded type
+     * To receive a value and return a potential value
+     * @param  {Function}   fn    Function to bind
+     * @return {[Function]}       Function that was binded to a higher kinded type 
+     */
     bind(fn) {
       return (...args) => {        
         return Try.unit(() => {
