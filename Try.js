@@ -1,27 +1,67 @@
 module.exports = (function() {
-	"use strict";
-	
-	function Try(value, error) {
-		this.value = value;
-		this.error = error;
-	}
+	let Try = (() => {	
+		let _Try = (() => {
+			return class Try {
+				constructor(value, isSuccess) {
+					Object.assign(this, { value, isSuccess });
+				}
 
-	Try.prototype.match = function match(success, failure) {
-		if (!this.error) {
-			return success && success.call(this, this.value);
-		} else {
-			return failure && failure.call(this, this.error);
+				match(success, failure) {
+					return this.isSuccess
+						? success.call(this, this.value)
+						: failure.call(this, this.value);
+				}
+			}
+		})();
+
+		class Success extends _Try {
+			constructor(value) {
+				super(value, true);
+			}
+
+			toString() {
+				return `Success ${this.value}`
+			}
 		}
-	}
 
-	Try.attempt = function(fn) {
-		var params = [].slice.call(arguments, 1);
-		try {
-			return new Try(fn.apply(this, params), null);
-		} catch (e) {
-			return new Try(null, e);
+		class Failure extends _Try {
+			constructor(value) {
+				super(value, false);
+			}
+
+			toString() {
+				return `Failure ${this.value}`
+			}
 		}
-	}
 
-	return { Try: Try };
+		return (new function Try() {
+      this.prototype = _Try.prototype,
+      
+			this.lift = (fn) => (...args) => {
+				try {
+					return new Success(fn.apply(this, args));
+				} catch(e) {
+					return new Failure(e);
+				}
+			}
+
+			this.unit = (fn) => {
+				return this.lift(fn)();
+			}
+
+			this.bind = (fn) => (...args) => {
+				if (args.some(x => !(x instanceof _Try))) {
+					throw new Error("'bind' requires Try typed paramenters");
+				}
+				else if (args.some(x => x instanceof Failure)) {
+					return args.filter(x => x instanceof Failure)[0];
+				}
+
+				let unwrappedValues = args.map(x => x.value);
+				return this.unit(() => fn.unit(null, unwrappedValues));
+			}
+		})
+	})();
+
+	return { Try };
 })()
