@@ -8,19 +8,14 @@ module.exports = (() => {
     }
   })();
 
-  function Io() {};
-
-  Object.defineProperty(Io, 'lift', {
-    value: (fn) => new _Io(fn),
-    enumerable: true
-  });
-
-  Object.defineProperty(Io, 'bind', {
-    value: function(fn, ...defParams) {
-      return (...args) => new _Io(() => fn.apply(this, defParams.concat(args)));
+  let Io = {
+    lift(fn) {
+      return new _Io(fn);
     },
-    enumerable: true
-  });
-  
+    bind(fn, ...defArgs) {
+      return new _Io(() => fn.apply(this, defArgs.concat(args)));
+    }
+  }
+
   return { Io };
 })();
