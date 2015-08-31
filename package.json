@@ -4,13 +4,7 @@
   "description": "Functional Programming in Javascript",
   "main": "src/FunctionalProgramming.js",
   "scripts": {
-    "test": "jasmine-node spec/",
-    "test:watch": "jasmine-node spec/ --color --autotest --watch src/",
-    "minify": "uglifyjs src/FunctionalProgramming.js --output dist/FunctionalProgramming.min.js --comments --verbose",
-    "jshint": "npm run jshint:src && npm run jshint:test",
-    "jshint:src": "jshint src/",
-    "jshint:test": "jshint test/",
-    "build": "npm run test && npm run minify"
+    "test": "jasmine"
   },
   "repository": {
     "type": "git",
@@ -23,7 +17,7 @@
   },
   "homepage": "https://github.com/karudedios/FunctionalProgramming.js#readme",
   "devDependencies": {
-    "jasmine-node": "^1.14.5",
+    "jasmine-es6": "0.0.17",
     "jshint": "^2.8.0",
     "uglify-js": "^2.4.24"
   }
