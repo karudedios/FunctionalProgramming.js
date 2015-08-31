@@ -1,33 +1,67 @@
-module.exports = (function() {
-	"use strict";
-	
-	function Either(error, value) {
-		this.value = value;
-		this.error = error;
-		this.isRight = value != null;
-		this.isLeft = !this.isRight;
-	}
+module.exports = (() => {
+	let Either = (() => {
+		class Either {
+			constructor(value, isRight) {
+				Object.assign(this, { value, isRight });
+			}
 
-	Either.prototype.match = function(failure, success) {
-		if (this.isRight) {
-			return success && success.call(this, this.value);
-		} else {
-			return failure && failure.call(this, this.error);
+			match(left, right) {
+				return this instanceof Right
+					? right(this.value)
+					: left(this.value);
+			}
 		}
-	}
 
-	Either.prototype.select = function(failure, success) {
-		return new Either(failure.call(this, this.error), success.call(this, this.value));
-	}
+		class Right extends Either {
+			constructor(value) {
+				super(value, true);
+			}
 
-	Either.prototype.get = function() {
-		return this.match(
-			function left(l) { return l; },
-			function right(r) { return r; }
-		);
-	}
+			toString() {
+				return `Right ${this.value}`
+			}
+		}
 
-	return {
-		Either: Either
-	};
+		class Left extends Either {
+			constructor(value) {
+				super(value, false);
+			}
+
+			toString() {
+				return `Left ${this.value}`
+			}
+		}
+
+		return {
+      prototype: Either.prototype,
+      
+			left(l) {
+				return new Left(l);
+			},
+
+			right(r) {
+				return new Right(r);
+			},
+
+			unit(failFn, value) {
+				if (value != 0 && !(value && value.constructor))
+					return new Left(failFn());
+
+	      let t = (new ((value).constructor)(value)).valueOf();
+	      let defaultValue = t.name === '' ? NaN : t;
+
+				return (!value && value !== defaultValue)
+					? new Left(failFn())
+					: new Right(value);
+			},
+			
+			when(predicate, right, left) {
+				return predicate
+					? new Right(right())
+					: new Left(left());
+			}
+		}
+	})();
+
+	return { Either };
 })();

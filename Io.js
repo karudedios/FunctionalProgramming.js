@@ -1,26 +1,24 @@
 module.exports = (() => {
-  let _Io = (() => {
-    return class Io {
+  let Io = (() => {
+    class Io {
       constructor(f) {
         if (!(f instanceof Function)) throw "Io only accepts function as constructor parameter";
         Object.defineProperty(this, 'resolve', { value: f, enumerable: true });
       }
     }
+
+    return {
+      prototype: Io.prototype,
+      
+      unit(fn) {
+        return new Io(fn);
+      },
+
+      lift(fn, ...defArgs) {
+        return new Io(() => fn.apply(this, defArgs.concat(args)));
+      }
+    }
   })();
 
-  function Io() {};
-
-  Object.defineProperty(Io, 'lift', {
-    value: (fn) => new _Io(fn),
-    enumerable: true
-  });
-
-  Object.defineProperty(Io, 'bind', {
-    value: function(fn, ...defParams) {
-      return (...args) => new _Io(() => fn.apply(this, defParams.concat(args)));
-    },
-    enumerable: true
-  });
-  
   return { Io };
 })();

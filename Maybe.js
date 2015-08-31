@@ -1,53 +1,64 @@
-module.exports = (function() {
-	"use strict";
-	
-	function Maybe(value) {
-		var unit = new (function unit() {})();
-		this.value = value == null || value == undefined ? unit : value;
-		this.isEmpty = (this.value == unit);
+module.exports = (() => {
+	let Maybe = (() => {
+		class Maybe {
+			constructor(isEmpty) {
+				this.isEmpty = isEmpty;
+			}
 
-		if (this.isEmpty) return new Nothing();
-		if (!this.isEmpty) return new Just(value);
-	}
-
-	Maybe.prototype.match = function(just, nothing) {
-		if (this instanceof Nothing) {
-			return nothing.call(this);
-		} else {
-			return just.call(this, this.value);
-		}
-	}
-
-	Maybe.prototype.getWhenNothing = function (NothingFn) {
-		if (this instanceof Nothing)
-			return NothingFn();
-		else
-			return this.value;
-	}
-
-	function Nothing() {
-		this.value = {}
-		this.isEmpty= true;
-	}
-
-	Nothing.prototype = Object.create(Maybe.prototype);
-	Nothing.constructor = Nothing;
-
-	function Just(value) {
-		if (value == null || value == undefined) {
-			return new Nothing();
+			match(just, nothing) {
+				return this instanceof Nothing
+					? nothing()
+					: just(this.value);
+			}
 		}
 
-		this.value = value;
-		this.isEmpty= false;
-	}
+		class Nothing extends Maybe {
+			constructor() {
+				super(true);
+			}
 
-	Just.prototype = Object.create(Maybe.prototype);
-	Just.constructor = Just;
+			toString() {
+				return 'Nothing';
+			}
+		}
 
-	return {
-		Maybe: Maybe,
-		Just: Just,
-		Nothing: Nothing
-	};
+		class Just extends Maybe {
+			constructor(value) {
+				super(false);
+				this.value = value;
+			}
+
+			toString() {
+				return `Just ${this.value}`;
+			}
+		}
+
+		return {
+      prototype: Maybe.prototype,
+      
+			nothing() {
+				return new Nothing
+			},
+
+			unit(value) {
+				if (!(value && value.constructor))
+					return new Nothing;
+
+	      let t = (new ((value).constructor)(value)).valueOf();
+	      let defaultValue = t.name === '' ? NaN : t;
+
+				return (!value && value !== defaultValue)
+					? new Nothing
+					: new Just(value);
+			},
+
+			when(predicate, just) {
+				return predicate
+					? new Just(just())
+					: new Nothing;
+			}
+		};
+	})();
+
+	return { Maybe };
 })();

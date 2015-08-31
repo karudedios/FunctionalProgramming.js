@@ -22,11 +22,16 @@ module.exports = (() => {
   }
 
   class Done extends Bounce {
-    constructor(v) { super(); this.val = v; }
+    constructor(f) { super(); this.val = f; }
   }
 
-  let call = (f) => new Call(f);
-  let done = (v) => new Done(v);
+  return {
+    call(f) {
+      return new Call(f);
+    },
 
-  return { call, done };
+    done(f) {
+      return new Done(f)
+    }
+  };
 })();
