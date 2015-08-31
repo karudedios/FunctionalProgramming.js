@@ -51,9 +51,9 @@ module.exports = (function() {
 	 */
 	Either.prototype.toMaybe = function() {
 		if (this.isRight) {
-			return new Just(this.value);
+			return Maybe.lift(this.value);
 		} else {
-			return new Nothing();
+			return Maybe.nothing;
 		}
 	}
 
@@ -99,10 +99,6 @@ module.exports = (function() {
 		}
 	}
 
-	Maybe.lift = function(value) {
-		return new Just(value);
-	}
-
   Either.bind = function(fn, ret) {
     return (eitherParam) => {
       return eitherParam.match(
@@ -118,7 +114,7 @@ module.exports = (function() {
     }
   }
 
-  Either.lift = function(eitherFn, value) {
+  /*Either.lift = function(eitherFn, value) {
     eitherFn = eitherFn || function(n) { return n; }
     return Maybe.lift(value).match(
       function just(v) {
@@ -134,7 +130,7 @@ module.exports = (function() {
       function nothing() {
         return new Either(eitherFn(), null);
       });
-  };
+  };*/
 
 	return {
 		Maybe: Maybe,
