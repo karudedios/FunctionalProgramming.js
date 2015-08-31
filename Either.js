@@ -2,16 +2,13 @@ module.exports = (() => {
 	let Either = (() => {
 		class Either {
 			constructor(value, isRight) {
-				this.value = value;
-				Object.defineProperty(this, 'isRight', { value: isRight });
+				Object.assign(this, { value, isRight });
 			}
 
 			match(left, right) {
-				if (this instanceof Right) {
-					return right && right.call(this, this.value);
-				} else {
-					return left && left.call(this, this.error);
-				}
+				return this instanceof Right
+					? right(this.value)
+					: left(this.value);
 			}
 		}
 
@@ -19,39 +16,49 @@ module.exports = (() => {
 			constructor(value) {
 				super(value, true);
 			}
+
+			toString() {
+				return `Right ${this.value}`
+			}
 		}
 
 		class Left extends Either {
 			constructor(value) {
 				super(value, false);
 			}
+
+			toString() {
+				return `Left ${this.value}`
+			}
 		}
 
 		return {
+      prototype: Either.prototype,
+      
 			left(l) {
-				new Left(l)
+				return new Left(l);
 			},
 
 			right(r) {
-				new Right(r)
+				return new Right(r);
 			},
 
-			lift(failFn, value) {
-				if (!(value && value.constructor))
-					return Either.left(failFn());
+			unit(failFn, value) {
+				if (value != 0 && !(value && value.constructor))
+					return new Left(failFn());
 
 	      let t = (new ((value).constructor)(value)).valueOf();
 	      let defaultValue = t.name === '' ? NaN : t;
 
 				return (!value && value !== defaultValue)
-					? Either.left(failFn())
-					: Either.right(value);
+					? new Left(failFn())
+					: new Right(value);
 			},
 			
-			if(predicate, left, right) {
+			when(predicate, right, left) {
 				return predicate
-					? Either.left(left())
-					: Either.right(right());
+					? new Right(right())
+					: new Left(left());
 			}
 		}
 	})();

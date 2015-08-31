@@ -16,6 +16,10 @@ module.exports = (() => {
 			constructor() {
 				super(true);
 			}
+
+			toString() {
+				return 'Nothing';
+			}
 		}
 
 		class Just extends Maybe {
@@ -23,10 +27,20 @@ module.exports = (() => {
 				super(false);
 				this.value = value;
 			}
+
+			toString() {
+				return `Just ${this.value}`;
+			}
 		}
 
 		return {
-			lift(value) {
+      prototype: Maybe.prototype,
+      
+			nothing() {
+				return new Nothing
+			},
+
+			unit(value) {
 				if (!(value && value.constructor))
 					return new Nothing;
 
@@ -38,14 +52,10 @@ module.exports = (() => {
 					: new Just(value);
 			},
 
-			if(predicate, just) {
+			when(predicate, just) {
 				return predicate
 					? new Just(just())
-					: new Nothing
-			},
-			
-			nothing() {
-				return new Nothing
+					: new Nothing;
 			}
 		};
 	})();
