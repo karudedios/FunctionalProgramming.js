@@ -1,6 +1,12 @@
 import { Maybe } from '../src/FunctionalProgramming'
 
 describe('Maybe', () => {
+  describe(".nothing", () => {
+    it("should hold a Nothing value", () => {
+      expect(Maybe.nothing().toString()).toBe('Nothing', "Well, looks like Maybe.nothing() isn't Nothing");
+    });
+  });
+
   describe(".unit", () => {
     it("should convert any valid value to a Just", () => {
       let value = 10;
