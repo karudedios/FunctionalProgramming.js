@@ -9,13 +9,10 @@ export default (() => {
      * @return {Maybe}  A potential value or nothing
      */
     toMaybe() {
-      return this.match(
-        function left() {
-          return Maybe.nothing();
-        },
-        function right(v) {
-          return Maybe.unit(v);
-        });
+      return this.match({
+        left: () => Maybe.nothing(),
+        right: (v) => Maybe.unit(v)
+      });
     }
   });
 
@@ -26,13 +23,10 @@ export default (() => {
      * @return {Either}         Either the potential type or the designed error value
      */
     asEither(left) {
-      return this.match(
-        function just(v) {
-          return Either.right(v);
-        },
-        function nothing() {
-          return Either.left(left());
-        });
+      return this.match({
+        just: (v) => Either.right(v),
+        nothing: () => Either.left(left())
+      });
     },
 
     /**
@@ -49,10 +43,10 @@ export default (() => {
         }
 
         return self;
-      }).match(
-        function success(v) { return v; },
-        function failure() { return Maybe.nothing(); }
-      );
+      }).match({
+          success: (v) => v,
+          failure: () => Maybe.nothing()
+        });
     }
   });
   
@@ -62,13 +56,10 @@ export default (() => {
      * @return {Either}   Either a value or a failure
      */
     asEither() {
-      return this.match(
-        function success(v) {
-          return Either.right(v);
-        },
-        function failure(v) {
-          return Either.left(v);
-        });
+      return this.match({
+        success: (v) => Either.right(v),
+        failure: (v) => Either.left(v)
+      });
     },
 
     /**
@@ -76,13 +67,10 @@ export default (() => {
      * @return {Maybe}   Potential value or nothing
      */
     toMaybe() {
-      return this.match(
-        function success(v) {
-          return Maybe.unit(v);
-        },
-        function failure() {
-          return Maybe.nothing();
-        });
+      return this.match({
+        success: (v) => Maybe.unit(v),
+        failure: () => Maybe.nothing()
+      });
     }
   });
 
@@ -98,13 +86,10 @@ export default (() => {
       return (...args) => {
         return Try.unit(() => {
           return fn.apply(null, args);
-        }).match(
-          function success(v) {
-            return Either.unit(fail, v);
-          },
-          function failure(f) {
-            return Either.left(f);
-          });
+        }).match({
+          success: (v) => Either.unit(fail, v),
+          failure: (f) => Either.left(f)
+        });
       };
     },
 
@@ -125,13 +110,10 @@ export default (() => {
 
           let unwrappedArgs = args.map(x => x.value);
           return fn.apply(null, unwrappedArgs);
-        }).match(
-          function success(v) {
-            return Either.unit(fail, v);
-          },
-          function failure(f) {
-            return Either.left(f);
-          });
+        }).match({
+          success: (v) => Either.unit(fail, v),
+          failure: (f) => Either.left(f)
+        });
       };
     }
   });
@@ -147,13 +129,10 @@ export default (() => {
       return (...args) => {
         return Try.unit(() => {
           return fn.apply(null, args);
-        }).match(
-          function success(v) {
-            return Maybe.unit(v);
-          },
-          function failure() {
-            return Maybe.nothing();
-          });
+        }).match({
+          success: (v) => Maybe.unit(v),
+          failure: () => Maybe.nothing()
+        });
       };
     },
 
@@ -173,13 +152,10 @@ export default (() => {
 
           let unwrappedArgs = args.map(x => x.value);
           return fn.apply(null, unwrappedArgs);
-        }).match(
-          function success(v) {
-            return Maybe.unit(v);
-          },
-          function failure() {
-            return Maybe.nothing();
-          });
+        }).match({
+          success: (v) => Maybe.unit(v),
+          failure: () => Maybe.nothing()
+        });
       };
     }
   });
