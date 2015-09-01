@@ -4,7 +4,11 @@
   "description": "Functional Programming in Javascript",
   "main": "src/FunctionalProgramming.js",
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine",
+    "lint": "npm run lint:src & npm run lint:lib",
+    "lint:src": "jshint --verbose src/FunctionalProgramming.js",
+    "lint:lib": "jshint --verbose lib/",
+    "build": "npm run test && npm run lint"
   },
   "repository": {
     "type": "git",
