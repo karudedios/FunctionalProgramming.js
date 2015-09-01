@@ -19,6 +19,27 @@ describe('Maybe', () => {
     });
   });
 
+  describe(".match", () => {
+    it("should take 'just' path when is a Just", () => {
+      let value = 10;
+      let unit = Maybe.unit(value);
+
+      unit.match({
+        just: (v) => expect(v).toBe(value),
+        nothing: () => expect(true).toBeFalsy("Match went to the 'nothing' path")
+      });
+    });
+
+    it("should take 'nothing' path when is a Nothing", () => {
+      let unit = Maybe.unit(NaN);
+
+      unit.match({
+        just: (v) => expect(true).toBeFalsy("Match went to the 'just' path"),
+        nothing: () => expect(true).toBe(true)
+      });
+    });
+  });
+
   describe(".lift", () => {
     let sum = (a, b) => a + b;
     let liftedSum = Maybe.lift(sum);
