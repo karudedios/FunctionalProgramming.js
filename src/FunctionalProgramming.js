@@ -44,9 +44,9 @@ export default (() => {
 
         return self;
       }).match({
-          success: (v) => v,
-          failure: () => Maybe.nothing()
-        });
+        success: (v) => v,
+        failure: () => Maybe.nothing()
+      });
     }
   });
   
