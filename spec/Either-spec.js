@@ -1,4 +1,4 @@
-import { Either } from '../src/FunctionalProgramming'
+import { Either } from '../src/FunctionalProgramming';
 
 describe('Either', () => {
   describe(".right", () => {

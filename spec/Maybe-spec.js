@@ -1,4 +1,4 @@
-import { Maybe } from '../src/FunctionalProgramming'
+import { Maybe } from '../src/FunctionalProgramming';
 
 describe('Maybe', () => {
   describe(".nothing", () => {
