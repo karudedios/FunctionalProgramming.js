@@ -58,8 +58,72 @@ describe('Either', () => {
   });
 
   describe(".lift", () => {
+    let sum = (a, b) => a + b;
+    let left = () => "Invalid sum arguments";
+    let liftedSum = Either.lift(left, sum);
+
+    it("should have lifted function be truthy", () => {
+      expect(liftedSum).toBeTruthy(`Either.lift(${left}, ${sum}) was falsy`);
+    });
+
+    it("should have the result from calling the lifted function be truthy", () => {
+      let eitherResult = liftedSum(2, 4);
+      expect(eitherResult).toBeTruthy("liftedSum(2, 4) was falsy");
+    });
+
+    it("should return a Right when called with valid arguments", () => {
+      let eitherResult = liftedSum(2, 4);
+      expect(eitherResult.toString()).toBe(`Right ${sum(2, 4)}`);
+    });
+
+    it("should return a Left whe called with invalid arguments", () => {
+      let eitherResultA = liftedSum(2, undefined);
+      expect(eitherResultA.toString()).toBe(`Left ${left()}`);
+
+      let eitherResultB = liftedSum(undefined, 4);
+      expect(eitherResultB.toString()).toBe(`Left ${left()}`);
+    })
+
+    it("should turn wrap a function so that it returns a value wrapped in a Either", () => {
+      let result = sum(2, 4);
+      let eitherResult = liftedSum(2, 4);
+      expect(result).toEqual(eitherResult.value, `${result} seems to be different to ${eitherResult}'s value`);
+    });
   });
 
   describe(".bind", () => {
+    let sum = (a, b) => a + b;
+    let left = () => "Invalid Either arguments";
+    let bindedSum = Either.bind(left, sum);
+
+    it("should have binded function be truthy", () => {
+      expect(bindedSum).toBeTruthy(`Either.bind(${sum}) was falsy`);
+    });
+
+    it("should return a Left when called with non-either values", () => {
+      let invalidLiftedCallA = bindedSum(2, undefined);
+      expect(invalidLiftedCallA.toString()).toBe(`Left ${left()}`);
+
+      let invalidLiftedCallB = bindedSum(undefined, 4);
+      expect(invalidLiftedCallB.toString()).toBe(`Left ${left()}`);
+
+      let validLiftedCall = bindedSum(2, 4);
+      expect(validLiftedCall.toString()).toBe(`Left ${left()}`);
+    });
+
+    it("should return Right when valid call is issued", () => {
+      let validCall = bindedSum(Either.unit(left, 5), Either.unit(left, 10));
+      expect(validCall.toString()).toBe(`Right ${sum(5, 10)}`);
+    });
+
+    it("should return Left when Left argument is issued", () => {
+      let l1 = "First parameter is Invalid";
+      let invalidCall1 = bindedSum(Either.left(l1), Either.right(10));
+      expect(invalidCall1.toString()).toBe(`Left ${l1}`);
+
+      let l2 = "Second parameter is Invalid";
+      let invalidCall2 = bindedSum(Either.right(5), Either.left(l2));
+      expect(invalidCall2.toString()).toBe(`Left ${l2}`);
+    });
   });
 });
