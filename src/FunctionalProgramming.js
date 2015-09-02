@@ -103,16 +103,14 @@ export default (() => {
     bind(fail, fn) {
       return (...args) => {
         return Try.unit(() => {
-          if (args.some(x => !(x instanceof Either.prototype.constructor)))
-            throw new Error("'bind' requires Either typed paramenters");
-          else if (args.some(x => !x.isRight))
-            throw args.filter(x => !x.isRight)[0].value;
-
-          let unwrappedArgs = args.map(x => x.value);
-          return fn.apply(null, unwrappedArgs);
+          return args.some(x => !(x instanceof Either.prototype.constructor))
+            ? Either.left(fail())
+            : args.some(x => !x.isRight)
+              ? args.filter(x => !x.isRight)[0]
+              : Either.unit(fail, fn.apply(null, args.map(x => x.value)));
         }).match({
-          success: (v) => Either.unit(fail, v),
-          failure: (f) => Either.left(f)
+          success: (v) => v,
+          failure: () => Either.left(fail())
         });
       };
     }
@@ -145,15 +143,13 @@ export default (() => {
     bind(fn) {
       return (...args) => {
         return Try.unit(() => {
-          if (args.some(x => !(x instanceof Maybe.prototype.constructor)))
-            throw new Error("'bind' requires Maybe typed paramenters");
-          else if (args.some(x => x.isEmpty))
-            throw "Nothing";
-
-          let unwrappedArgs = args.map(x => x.value);
-          return fn.apply(null, unwrappedArgs);
+          return args.some(x => !(x instanceof Maybe.prototype.constructor))
+            ? Maybe.nothing()
+            : args.some(x => x.isEmpty)
+              ? Maybe.nothing()
+              : Maybe.unit(fn.apply(null, args.map(x => x.value)));
         }).match({
-          success: (v) => Maybe.unit(v),
+          success: (v) => v,
           failure: () => Maybe.nothing()
         });
       };
