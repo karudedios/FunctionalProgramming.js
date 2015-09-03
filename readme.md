@@ -41,7 +41,8 @@ let updateFactory = (id, { updatedItem }) => {
 
 let item = Factory.retreive({ id: 21, unique: true });
 
-item.barrelRoll(); // This goes wrong.
+let updatedItem = item.barrelRoll(); // This goes wrong.
+updateFactory(21, { updatedItem }); // This goes even worst.
 
 
 ```
@@ -52,7 +53,8 @@ Of course, it can be fixed with  a simple if
 let item = Factory.retreive({ id: 21, unique: true });
 
 if (item) {
-  item.barrelRoll();
+  let updatedItem = item.barrelRoll();
+  updateFactory(21, { updatedItem });
 } else {
   // ...
 }
@@ -67,7 +69,10 @@ But this sort of uglifies the code, you can percieve the intention, but it seems
 ////////////////////
 
 Maybe.unit(Factory.retreive({ id: 21, unique: true })).match({
-  just: item => item.barrelRoll(),
+  just: item => Maybe.unit(item.barrelRoll()),
+  nothing: () => Maybe.nothing()
+}).match({
+  just: updatedItem => updateFactory(21, { updatedItem }),
   nothing: Identity
 });
 
