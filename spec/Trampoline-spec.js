@@ -53,19 +53,5 @@ describe('Trampoline', () => {
         expect(odd(11)).toBe(trampolinedOdd(11));
       });
     });
-
-    describe("fibonacci", () => {
-      it("should work", () => {
-        let fibonacci = (n) => n <= 2 ? 1 : fibonacci(n - 1) + fibonacci(n - 2);
-        
-        let trampolinedFibonacci = Trampoline.build({
-          predicate: (n) =>  n <= 2,
-          done: () => 1,
-          call: (n, step) => step(n - 1, (a) => step(n - 2, (b) => a + b))
-        });
-
-        expect(fibonacci(10)).toBe(trampolinedFibonacci(10));
-      });
-    });
   });
 });
