@@ -1,4 +1,4 @@
-import { Trampoline, Either, Maybe, Try, Io } from '../lib/monad/bundle.js';
+import { Trampoline, Either, Maybe, Try, Io } from '../lib/Monad/Bundle.js';
 
 export default (() => {
   "use strict";
