@@ -6,7 +6,7 @@
 The concept of this project was based off of [RacoWireless/Functional Programming for C#](https://github.com/RacoWireless/FunctionalProgramming)
 
 ##Description
-The objective of this project is to have access to some Functional Programming's conecpts in order to ease some of the regular problems one can be presented with when developing something on Javascript.
+The objective of this project is to have access to some Functional Programming's concepts in order to ease some of the regular problems one can be presented with when developing something on Javascript.
 
 
 ##Table of Content
@@ -19,9 +19,9 @@ The objective of this project is to have access to some Functional Programming's
 ##Content
 
 ###Maybe
-In javascript the `falsey` values really don't make too much sense, you don't have a valid 'absence of value', so, for any type you can get `undefined` as absence, which is conceptually wrong, given that `undefined` means lack of existance, but it does exist, it just doesn't havea value. And this is where the 'wrapper' Maybe comes into play.
+In javascript the `falsey` values really don't make too much sense, you don't have a valid 'absence of value', so, for any type you can get `undefined` as absence, which is conceptually wrong, given that `undefined` means lack of existence, but it does exist, it just doesn't have a value. And this is where the 'wrapper' Maybe comes into play.
 
-Imagine the following scenario, you have a factory which searches in a collection by a provided Id, however, if said Id is not found you would get `undefined` instead, said factory uses an `Object` created by the user so, it has custom properties on it's prototype the you wish to call after fetching, you have workarounds to verify the nullability of the result, but, why not simply doing what you have to do when you have to do it, (say, when it's not undefined);
+Imagine the following scenario, you have a factory which searches in a collection by a provided Id, however, if said Id is not found you would get `undefined` instead, said factory uses an `Object` created by the user so, it has custom properties on its prototype the you wish to call after fetching, you have workarounds to verify the nullability of the result, but, why not simply doing what you have to do when you have to do it, (say, when it's not undefined);
 
 
 For the sake of brevity let's imagine the factory only holds 20 items.
@@ -39,7 +39,7 @@ let updateFactory = (id, { updatedItem }) => {
 // Typical Vanilla Approach //
 //////////////////////////////
 
-let item = Factory.retreive({ id: 21, unique: true });
+let item = searchById(21);
 
 let updatedItem = item.barrelRoll(); // This goes wrong.
 updateFactory(21, { updatedItem }); // This goes even worst.
@@ -50,7 +50,7 @@ updateFactory(21, { updatedItem }); // This goes even worst.
 Of course, it can be fixed with  a simple if
 
 ```javascript
-let item = Factory.retreive({ id: 21, unique: true });
+let item = searchById(21);
 
 if (item) {
   let updatedItem = item.barrelRoll();
@@ -68,7 +68,7 @@ But this sort of uglifies the code, you can percieve the intention, but it seems
 // Maybe Approach //
 ////////////////////
 
-Maybe.unit(Factory.retreive({ id: 21, unique: true })).match({
+Maybe.unit(searchById(21)).match({
   just: item => Maybe.unit(item.barrelRoll()),
   nothing: () => Maybe.nothing()
 }).match({
