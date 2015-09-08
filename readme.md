@@ -61,7 +61,7 @@ if (item) {
 
 ```
 
-But this sort of uglifies the code, you can percieve the intention, but it seems like the 'else' path leads astray, is doing nothing, it's returning nothing, when you object has an invalid state, what do you do?
+But this sort of uglifies the code, you can perceive the intention, but it seems like the 'else' path leads astray, is doing nothing, it's returning nothing, when you object has an invalid state, what do you do?
 
 ```javascript
 ////////////////////
