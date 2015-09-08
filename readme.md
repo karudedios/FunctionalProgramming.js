@@ -35,9 +35,9 @@ let updateFactory = (id, { updatedItem }) => {
   return Public.unit;
 }
 
-//////////////////////////////
-// Typical Vanilla Approach //
-//////////////////////////////
+/**
+ * Typical Vanilla Approach
+ */
 
 let item = searchById(21);
 
@@ -64,21 +64,103 @@ if (item) {
 But this sort of uglifies the code, you can perceive the intention, but it seems like the 'else' path leads astray, is doing nothing, it's returning nothing, when you object has an invalid state, what do you do?
 
 ```javascript
-////////////////////
-// Maybe Approach //
-////////////////////
+/**
+ * Maybe Approach
+ */
 
 Maybe.unit(searchById(21)).match({
   just: item => Maybe.unit(item.barrelRoll()),
-  nothing: () => Maybe.nothing()
+  nothing: Maybe.nothing
 }).match({
   just: updatedItem => updateFactory(21, { updatedItem }),
-  nothing: Identity
+  nothing: Maybe.nothing
 });
 
 ```
 
+The Maybe path tries to lead you into doing everything on it's own space, you first search, if there's nothing, then, tell me there's nothing, if there's something do a BarelRoll, if your BarelRoll wasn't successfull give me nothing, otherwise let's update you.
+
 ###Either
+However, there are situations where a Maybe is not the most apropriate [Algebraic Data Type](https://en.wikipedia.org/wiki/Algebraic_data_type) to handle certain situations, you will have _(in occassions)_ more than simply a `value` or `nothing`, you will have `value` or a `'value`, to illustrate this we'll create a `sum` function.
+
+```Javascript
+/**
+ * Tipical Vanilla Approach
+ */
+
+let sum = (a, b) => a + b;
+
+sum(1, 3); // 4. Great!
+sum(null, 5); // 5. What?
+sum(10, undefined); // NaN. Well, this is actually true.
+
+```
+
+Well, this situations can be easily addressed with a couple of If's
+
+```Javascript
+let isFalsy = (v) =>
+  (v instanceof Number && isNaN(v)) || typeof v === 'undefined' || v === null;
+
+let sum = (a, b) => {
+  if ([a, b].some(isFalsy)) {
+    throw new Error("Invalid numbers provided");
+  }
+
+  return a + b;  
+}
+
+sum(1, 3); // 4. Great!.
+sum(null, 5); // ERROR: Invalid numbers provided.
+sum(10, undefined); // ERROR: Invalid numbers provided.
+```
+
+Well, yeah, that works, however what if I want to know which number was the invalid one?
+
+```Javascript
+let sum = (a, b) => {
+  if (isFalsy(a)) {
+    throw new Error("The first addend was invalid");
+  } else if (isFalsy(b)) {
+    throw new Error("The second addend was invalid");
+  }
+
+  return a + b;  
+}
+
+sum(1, 3); // 4. Great!.
+sum(null, 5); // ERROR: The first addend was invalid.
+sum(10, undefined); // ERROR: The second addend was invalid.
+```
+
+Well this works perfectly! Now, let's see how that would work with an Either
+
+```Javascript
+/**
+ * Either Approach
+ */
+
+let sum = (a, b) => {
+  let eitherA = Either.unit(() => "The first addend was invalid", a);
+  let eitherB = Either.unit(() => "The second addend was invalid", b);
+
+  return eitherA.match({
+    left: Either.left,
+    right: addend1 =>
+      eitherB.match({
+        left: Either.left,
+        right: addend2 => Either.right(addend1 + addend2)
+      })
+  });
+}
+
+sum(1, 3); // Right 4
+sum(null, 5); // Left 'The first addend was invalid.'
+sum(10, undefined); // Left 'The second addend was invalid.'
+```
+
+The Either path as well as the Maybe path, tries to lead you to doing what you have to do where you have to be doing it, is it Failure? Take the left path, and in the left path do work specific for a failure. Is it a Success? Take the right path, and in the right path do work specific for a success.
+
 ###Try
 ###Io
 ###Trampoline
