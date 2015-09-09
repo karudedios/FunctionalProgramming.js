@@ -1,6 +1,6 @@
 {
   "name": "functional-programming.js",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Functional Programming in Javascript",
   "main": "src/FunctionalProgramming.js",
   "scripts": {
@@ -22,7 +22,6 @@
   "homepage": "https://github.com/karudedios/FunctionalProgramming.js#readme",
   "devDependencies": {
     "jasmine-es6": "0.0.17",
-    "jshint": "2.8.0",
-    "uglify-js": "2.4.24"
+    "jshint": "2.8.0"
   }
 }
