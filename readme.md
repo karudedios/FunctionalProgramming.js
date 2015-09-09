@@ -81,7 +81,7 @@ Maybe.unit(searchById(21)).match({
 The Maybe path tries to lead you into doing everything on it's own space, you first search, if there's nothing, then, tell me there's nothing, if there's something do a BarelRoll, if your BarelRoll wasn't successfull give me nothing, otherwise let's update you.
 
 ###Either
-However, there are situations where a Maybe is not the most apropriate [Algebraic Data Type](https://en.wikipedia.org/wiki/Algebraic_data_type) to handle certain situations, you will have _(in occassions)_ more than simply a `value` or `nothing`, you will have `value` or a `'value`, to illustrate this we'll create a `sum` function.
+There are situations where a Maybe is not the most apropriate [Algebraic Data Type](https://en.wikipedia.org/wiki/Algebraic_data_type) to handle certain situations, you will have _(in occassions)_ more than simply a `value` or `nothing`, you will have `value` or a `'value`, to illustrate this we'll create a `sum` function.
 
 ```Javascript
 /**
@@ -162,5 +162,156 @@ sum(10, undefined); // Left 'The second addend was invalid.'
 The Either path as well as the Maybe path, tries to lead you to doing what you have to do where you have to be doing it, is it Failure? Take the left path, and in the left path do work specific for a failure. Is it a Success? Take the right path, and in the right path do work specific for a success.
 
 ###Try
+There will be situations in which you'll have a function that potentially throws and exception that could stop your application from running, personally I think functions should throw their exceptions since if it doesn't mean some invalid data got to the method _(which should be prevented)_, it means that either what's inside the function wasn't properly protected against corner-cases, or a truly exceptional situation arised, on any case it's fine for the exception to be thrown, but, it's not fine for the exception to stop your application.
+
+Just like the Either, Try gives you two logical paths to follow, `success`, the provided function executed without problems, `failure`, could not execute the function because an `Exception` was thrown. To illustrate a little the scenarios we'll create a lite-`printf`.
+
+```Javascript
+/**
+ * Typical Vanilla Approach
+ */
+
+let printf = (text, ...toReplace) => {
+  let newText = text.slice();
+  let match;
+
+  while (match = newText.match(/%[a-z]/i)) {
+    let value = toReplace.shift();
+    let placeholder = match[0];
+
+    switch (placeholder) {
+      case '%s':
+        newText = newText.replace(placeholder, String(value));
+        break;
+      case '%d':
+        newText = newText.replace(placeholder, +value);
+        break;
+      default: break;
+    }
+  }
+
+  console.log(newText);
+}
+
+printf("Hello! My name is %s and I'm %d years old!", "Carlos", 20);
+     // Hello! My name is Carlos and I'm 20 years old!
+     // Well, that worked great!
+
+printf("Hello! My name is %d and I'm %s years old!", "Carlos", 20);
+     // Hello! My name is NaN and I'm 20 years old!
+     // Well, that didn't come out so good
+
+```
+
+Well, that's definitely a problem, but, what do we do here?
+
+Should we prematurely return a string that there's an invalid placeholder? or saying that an invalid data type was used?
+* I'd say no, starting with the the fact that printf is a `void` function, it returns nothing, it simply requires some parameters to cause some side-effect.
+
+Should we try/catch it and silently make like nothing happened?
+* That's not a nice thing to propose.
+
+Should we skip that specific placeholder and continue execution?
+* That would be misleading for the awaiter of the side-effect.
+
+
+So, I'd say we should throw an exception notifying that something that should be illegal inside the scope of the defined function just happened.
+
+```Javascript
+let printf = (text, ...toReplace) => {
+  let newText = text.slice();
+  let match;
+
+  while (match = newText.match(/%[a-z]/i)) {
+    let value = toReplace.shift();
+    let placeholder = match[0];
+
+    switch (placeholder) {
+      case '%s':
+        if (typeof value !== 'string') {
+          throw new Error(`Expected string, instead got ${typeof value}`);
+        }
+
+        newText = newText.replace(placeholder, String(value));
+        break;
+      case '%d':
+        if (typeof value !== 'number') {
+          throw new Error(`Expected number, instead got ${typeof value}`);
+        }
+
+        newText = newText.replace(placeholder, +value);
+        break;
+      default:
+        throw new Error(`Unrecognized placeholder ${placeholder}`);
+    }
+  }
+
+  console.log(newText);
+}
+
+printf("Hello! My name is %s and I'm %d years old!", "Carlos", 20);
+     // Hello! My name is Carlos and I'm 20 years old!
+     // Well, that worked great!
+
+printf("Hello! My name is %d and I'm %s years old!", "Carlos", 20);
+     // ERROR: Expected number, instead got string
+     // Great! Now we know exactly what went wrong
+```
+
+Now we have a perfectly working solution _aside from possible un-caught exceptions we're going to ignore_, but, there is something that's bothering me... That `console.log` is there, but won't be reached if something fails, if so, why is it the last line of code? If we remeber that code gets executed line by line you would expect this to be executed regardless, however, throwing exceptions alters this behaviour given that you're removed from your current scope to the scope that's catching exceptions, or, if you don't have, the exception is simply thrown. The point is, why not calling `console.log` strictly when everything went good?
+
+```Javascript
+/**
+ * Try Approach
+ */
+
+let printf = (text, ...toReplace) =>
+  Try.unit(() => {
+    let newText = text.slice();
+    let match;
+
+    while (match = newText.match(/%[a-z]/i)) {
+      let value = toReplace.shift();
+      let placeholder = match[0];
+
+      switch (placeholder) {
+        case '%s':
+          if (typeof value !== 'string') {
+            throw new Error(`Expected string, instead got ${typeof value}`);
+          }
+
+          newText = newText.replace(placeholder, String(value));
+          break;
+        case '%d':
+          if (typeof value !== 'number') {
+            throw new Error(`Expected number, instead got ${typeof value}`);
+          }
+
+        newText = newText.replace(placeholder, +value);
+        break;
+        default:
+          throw new Error(`Unrecognized placeholder ${placeholder}`);
+      }
+    }
+
+    return newText;
+  }).match({
+    success: console.log,
+    failure: (fail) => {
+      Logger.logFailure(fail);
+      console.error(fail);
+    }
+  });
+
+printf("Hello! My name is %s and I'm %d years old!", "Carlos", 20);
+     // Hello! My name is Carlos and I'm 20 years old!
+
+printf("Hello! My name is %d and I'm %s years old!", "Carlos", 20);
+     // ERROR: Expected number, instead got string
+
+```
+
+There we have it, you can clearly see at the end that there are 2 possible paths, and each one has only the code that said path is going to execute, and nothing else, if the previous function was wrong, then we'll log the result, say, the formatted string. However, if it goes wrong we're going to log the exception and print it for the awaiter of the side-effect to see.
+
 ###Io
 ###Trampoline
