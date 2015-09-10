@@ -156,5 +156,5 @@ export default (() => {
     }
   });
 
-  return { Trampoline, Either, Maybe, Try, Io, NoOperation(n) { return n; } };
+  return { Trampoline, Either, Maybe, Try, Io };
 })();
