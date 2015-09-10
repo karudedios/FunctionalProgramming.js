@@ -103,7 +103,7 @@ export default (() => {
     bind(fail, fn) {
       return (...args) => {
         return Try.unit(() => {
-          return args.some(x => !(x instanceof Either.prototype.constructor))
+          return args.some(x => !(x instanceof Either))
             ? Either.left(fail())
             : args.some(x => !x.isRight)
               ? args.filter(x => !x.isRight)[0]
@@ -143,7 +143,7 @@ export default (() => {
     bind(fn) {
       return (...args) => {
         return Try.unit(() => {
-          return args.some(x => !(x instanceof Maybe.prototype.constructor))
+          return args.some(x => !(x instanceof Maybe))
             ? Maybe.nothing()
             : args.some(x => x.isEmpty)
               ? Maybe.nothing()
