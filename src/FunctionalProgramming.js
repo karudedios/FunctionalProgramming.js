@@ -1,4 +1,5 @@
-import { Trampoline, Either, Maybe, Try, Io } from '../lib/Monad/Bundle.js';
+export * from '../lib/Monad/Bundle.js';
+import { Either, Maybe, Try } from '../lib/Monad/Bundle.js';
 
 export default (() => {
   "use strict";
@@ -156,5 +157,5 @@ export default (() => {
     }
   });
 
-  return { Trampoline, Either, Maybe, Try, Io };
+  return { Either, Maybe, Try };
 })();
