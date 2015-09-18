@@ -67,15 +67,119 @@ describe('Maybe', () => {
   });
 
   describe(".selectMany", () => {
+    it("should throw an exception when 'func' is a function that doesn't return a Maybe", () => {
+      /**
+       * Given a function
+       * 'a -> 'b
+       */
+      let unit = Maybe.unit(12);
+      
+      try {
+        unit.selectMany(x => x + 12);
+      } catch(e) {
+        expect(e instanceof TypeError).toBeTruthy();
+        expect(e.toString().indexOf("match is not a function") > -1).toBeTruthy();
+      }
+    });
 
+    it("should return the applied function wrapped as a Maybe when 'func' returns a Maybe", () => {
+      /**
+       * Given a function
+       * 'a -> Maybe<'a>
+       */
+      
+      let unit = Maybe.unit(12);
+      let transform = (x => Maybe.unit(x + 5));
+      
+      unit.selectMany(transform).match({
+        just: v => expect(v).toBe(17),
+        nothing: () => expect(false).toBeTruthy()
+      });
+    });
+
+    it("should return Nothing if the current Maybe is a Nothing", () => {
+      let unit = Maybe.unit(undefined);
+      let transform = (x => x);
+      
+      unit.selectMany(transform).match({
+        just: v => expect(false).toBeTruthy(),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
+
+    it("should return Nothing if the appled function returns invalid computation", () => {
+      let unit = Maybe.unit(undefined);
+      let transform = Maybe.nothing;
+
+      unit.selectMany(transform).match({
+        just: v => expect(false).toBeTruthy(),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
   });
 
   describe(".select", () => {
+    it("should return a Just with transformed value when applied to a Just", () => {
+      let unit = Maybe.unit(10);
+      let transform = (x => x * 2);
+      
+      unit.select(transform).match({
+        just: v => expect(v).toBe(20),
+        nothing: () => expect(false).toBeTruthy()
+      });
+    });
 
+    it("should return a Nothing when applied to a Nothing", () => {
+      let unit = Maybe.unit(undefined);
+      let transform = (x => x * 2);
+
+      unit.select(transform).match({
+        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
+
+    it("should return a Nothing when applied a transformation to a Just that returns invalid computation", () => {
+      let unit = Maybe.unit(12);
+      let transform = (x => undefined);
+
+      unit.select(transform).match({
+        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
   });
 
   describe(".where", () => {
+    it("should return Nothing when self if Nothing", () => {
+      let unit = Maybe.unit(undefined);
+      let predicate = (() => true);
 
+      unit.where(predicate).match({
+        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
+
+    it("should return Nothing when predicate is not met", () => {
+      let unit = Maybe.unit(10);
+      let predicate = (x => x % 3 === 0);
+      
+      unit.where(predicate).match({
+        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        nothing: () => expect(true).toBeTruthy()
+      });
+    });
+
+    it("should return Just when predicate is met", () => {
+      let unit = Maybe.unit(10);
+      let predicate = (() => true);
+
+      unit.where(predicate).match({
+        just: v => expect(v).toBe(10),
+        nothing: () => expect(false).toBeTruthy()
+      });
+    });
   });
 
   describe(".asEither", () => {
