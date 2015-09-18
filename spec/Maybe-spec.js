@@ -46,6 +46,42 @@ describe('Maybe', () => {
     });
   });
 
+  describe(".getOrElse", () => {
+    it("should get Maybe's value when a Just", () => {
+      let value = 10;
+      let error = "Oh noes!";
+      let unit = Maybe.unit(value);
+      let gotOrElse = unit.getOrElse(() => error);
+
+      expect(gotOrElse).toBe(value);
+    });
+
+    it("should be Default value when it's a Nothing", () => {
+      let value = undefined;
+      let error = "Oh noes!";
+      let unit = Maybe.unit(value);
+      let gotOrElse = unit.getOrElse(() => error);
+
+      expect(gotOrElse).toBe(error);
+    });
+  });
+
+  describe(".selectMany", () => {
+
+  });
+
+  describe(".select", () => {
+
+  });
+
+  describe(".where", () => {
+
+  });
+
+  describe(".asEither", () => {
+
+  });
+
   describe(".lift", () => {
     let sum = (a, b) => a + b;
     let liftedSum = Maybe.lift(sum);
