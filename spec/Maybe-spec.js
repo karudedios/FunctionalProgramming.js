@@ -78,7 +78,7 @@ describe('Maybe', () => {
         unit.selectMany(x => x + 12);
       } catch(e) {
         expect(e instanceof TypeError).toBeTruthy();
-        expect(e.toString().indexOf("match is not a function") > -1).toBeTruthy();
+        expect(e.toString().indexOf("undefined is not a function") > -1).toBeTruthy();
       }
     });
 
@@ -134,7 +134,7 @@ describe('Maybe', () => {
       let transform = (x => x * 2);
 
       unit.select(transform).match({
-        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        just: v => expect(false).toBeTruthy(`Expected Just ${v} to be Nothing`),
         nothing: () => expect(true).toBeTruthy()
       });
     });
@@ -144,7 +144,7 @@ describe('Maybe', () => {
       let transform = (x => undefined);
 
       unit.select(transform).match({
-        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        just: v => expect(false).toBeTruthy(`Expected Just ${v} to be Nothing`),
         nothing: () => expect(true).toBeTruthy()
       });
     });
@@ -156,7 +156,7 @@ describe('Maybe', () => {
       let predicate = (() => true);
 
       unit.where(predicate).match({
-        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        just: v => expect(false).toBeTruthy(`Expected Just ${v} to be Nothing`),
         nothing: () => expect(true).toBeTruthy()
       });
     });
@@ -166,24 +166,44 @@ describe('Maybe', () => {
       let predicate = (x => x % 3 === 0);
       
       unit.where(predicate).match({
-        just: v => expect(false).toBeTruthy(`Expected 'Nothing' instead got 'Just ${v}'`),
+        just: v => expect(false).toBeTruthy(`Expected Just ${v} to be Nothing`),
         nothing: () => expect(true).toBeTruthy()
       });
     });
 
     it("should return Just when predicate is met", () => {
-      let unit = Maybe.unit(10);
+      let just = 10;
+      let unit = Maybe.unit(just);
       let predicate = (() => true);
 
       unit.where(predicate).match({
-        just: v => expect(v).toBe(10),
-        nothing: () => expect(false).toBeTruthy()
+        just: v => expect(v).toBe(just),
+        nothing: () => expect(false).toBeTruthy(`Expected Nothing to be Just ${just}`)
       });
     });
   });
 
   describe(".asEither", () => {
+    let right = 12;
+    let left = "I am a left";
 
+    it("should return a Left when self is Nothing", () => {
+      let unit = Maybe.unit(undefined);
+      
+      unit.asEither(() => left).match({
+        right: v => expect(false).toBeTruthy(`Expected Right ${v} to be Left ${left}`),
+        left: l => expect(l).toBe(left)
+      });
+    });
+
+    it("should return a Right  when self is Just", () => {
+      let unit = Maybe.unit(right);
+
+      unit.asEither(() => left).match({
+        right: v => expect(v).toBe(right),
+        left: l => expect(false).toBeTruthy(`Expected Left ${v} to be Right ${right}`)
+      });
+    });
   });
 
   describe(".lift", () => {
